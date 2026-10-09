@@ -78,8 +78,14 @@ export default function OrderTrackingPage({
       }
     });
 
+    // Auto-polling fallback every 3s to guarantee live timeline sync
+    const interval = setInterval(() => {
+      fetchOrder();
+    }, 3000);
+
     return () => {
       sse.close();
+      clearInterval(interval);
     };
   }, [order?.restaurant_id, order?.id]);
 

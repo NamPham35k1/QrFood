@@ -83,8 +83,14 @@ export default function KitchenDisplaySystemPage() {
       }
     });
 
+    // Auto-polling fallback every 3s to guarantee kitchen ticket sync on serverless
+    const interval = setInterval(() => {
+      fetchTickets();
+    }, 3000);
+
     return () => {
       sse.close();
+      clearInterval(interval);
     };
   }, [soundEnabled]);
 

@@ -61,8 +61,14 @@ export default function AdminOrdersPage() {
       }
     });
 
+    // Auto-polling fallback every 3s to guarantee cross-device sync on serverless
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 3000);
+
     return () => {
       sse.close();
+      clearInterval(interval);
     };
   }, []);
 
