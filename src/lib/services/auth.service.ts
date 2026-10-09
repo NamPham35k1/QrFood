@@ -134,8 +134,12 @@ export async function authenticateStaff(email: string, passwordPlain: string): P
   const isMatch = await bcrypt.compare(passwordPlain, row.password_hash);
   if (!isMatch) return null;
 
-  // Update last login
-  db.prepare(`UPDATE users SET last_login_at = datetime('now') WHERE id = ?`).run(row.id);
+  // Update last login (non-fatal if DB is in read-only mode)
+  try {
+    db.prepare(`UPDATE users SET last_login_at = datetime('now') WHERE id = ?`).run(row.id);
+  } catch (err) {
+    console.warn('Could not update last_login_at (non-fatal):', err);
+  }
 
   const token = signToken({
     userId: row.id,

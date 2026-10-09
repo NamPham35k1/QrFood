@@ -9,19 +9,60 @@ export function getDb(): Database.Database {
     return dbInstance;
   }
 
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  const isServerless = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+  let dbPath = path.join(process.cwd(), 'data', 'qrfood.db');
+
+  if (isServerless) {
+    const tmpDir = path.join('/tmp', 'qrfood-data');
+    if (!fs.existsSync(tmpDir)) {
+      try {
+        fs.mkdirSync(tmpDir, { recursive: true });
+      } catch (err) {
+        console.warn('Could not create tmpDir:', err);
+      }
+    }
+    const tmpDbPath = path.join(tmpDir, 'qrfood.db');
+    if (!fs.existsSync(tmpDbPath) && fs.existsSync(dbPath)) {
+      try {
+        fs.copyFileSync(dbPath, tmpDbPath);
+      } catch (err) {
+        console.warn('Failed to copy db to /tmp:', err);
+      }
+    }
+    if (fs.existsSync(tmpDbPath)) {
+      dbPath = tmpDbPath;
+    }
+  } else {
+    const dataDir = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(dataDir)) {
+      try {
+        fs.mkdirSync(dataDir, { recursive: true });
+      } catch (err) {
+        console.warn('Could not create dataDir:', err);
+      }
+    }
   }
 
-  const dbPath = path.join(dataDir, 'qrfood.db');
-  dbInstance = new Database(dbPath);
+  try {
+    dbInstance = new Database(dbPath);
+  } catch (err) {
+    console.warn('Fallback opening db readonly:', err);
+    try {
+      dbInstance = new Database(dbPath, { readonly: true });
+    } catch (err2) {
+      console.error('Fatal database open error:', err2);
+      throw err2;
+    }
+  }
 
-  // Enable foreign keys and WAL mode for maximum performance & concurrent reads
-  dbInstance.pragma('journal_mode = WAL');
-  dbInstance.pragma('foreign_keys = ON');
-
-  initTables(dbInstance);
+  // Safely execute pragmas and table init without failing if filesystem is readonly
+  try {
+    dbInstance.pragma('journal_mode = WAL');
+    dbInstance.pragma('foreign_keys = ON');
+    initTables(dbInstance);
+  } catch (err) {
+    console.warn('Pragma or initTables non-fatal warning:', err);
+  }
 
   return dbInstance;
 }

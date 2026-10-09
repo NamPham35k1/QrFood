@@ -42,8 +42,11 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error);
-    return NextResponse.json({ success: false, error: 'Lỗi đăng nhập hệ thống.' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: `Lỗi đăng nhập: ${error?.message || 'Không thể xác thực tài khoản.'}` 
+    }, { status: 500 });
   }
 }
