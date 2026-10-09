@@ -2,6 +2,9 @@
 
 > **QRFood** là hệ thống Web Application hoàn chỉnh cho nhà hàng, cho phép khách hàng quét mã QR Code tại bàn để xem thực đơn, tùy biến món ăn, gửi đơn tới nhà bếp và thanh toán VietQR / Sandbox. Đồng thời, hệ thống cung cấp cổng quản trị đa vai trò (RBAC) với màn hình điều phối bếp (KDS), sơ đồ bàn ăn, in mã QR hàng loạt, quản lý thực đơn và báo cáo doanh thu trực quan.
 
+> 📖 **HƯỚNG DẪN CÀI ĐẶT CHO NGƯỜI MỚI (CLONE TỪ GIT):**  
+> Vui lòng xem tài liệu chi tiết từ A - Z tại: [**SETUP_GUIDE.md**](./SETUP_GUIDE.md)
+
 ---
 
 ## 🌟 5 ĐẶC ĐIỂM CỐT LÕI (CORE HIGHLIGHTS)
